@@ -9,5 +9,5 @@ export class CreateUserDto {
     name:string;
 
     @MinLength(6)
-    password:string;
+    password?:string;
 }
