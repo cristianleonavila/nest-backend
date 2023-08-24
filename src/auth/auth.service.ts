@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { BadRequestException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common/exceptions';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+
+import { CreateUserDto, UpdateUserDto, LoginDto, RegisterUserDto } from './dto';
+
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './entities/user.entity';
 import { Model } from 'mongoose';
 import * as bcryptjs from 'bcryptjs';
-import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './interfaces/jwt-payload';
+import { LoginResponse } from './interfaces/login-response';
 
 @Injectable()
 export class AuthService {
@@ -39,6 +40,14 @@ export class AuthService {
     }
   }
 
+  async register( registerUser: RegisterUserDto): Promise<LoginResponse> {
+    const user = await this.create( registerUser );
+    return {
+      user, 
+      token: this.getJwt({ id: user._id })
+    }
+  }
+
   findAll() {
     return `This action returns all auth`;
   }
@@ -55,7 +64,7 @@ export class AuthService {
     return `This action removes a #${id} auth`;
   }
 
-  async login (login: LoginDto) {
+  async login (login: LoginDto):Promise<LoginResponse> {
     const { email, password } = login;
     const user = await this.userModel.findOne({email});
     console.log(user);
